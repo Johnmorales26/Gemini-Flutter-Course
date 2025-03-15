@@ -1,3 +1,4 @@
+import 'package:ai_chat_app/core/services/vertex_service.dart';
 import 'package:ai_chat_app/features/chat/domain/chat.dart';
 import 'package:ai_chat_app/features/chat/data/chat_message.dart';
 import 'package:ai_chat_app/core/services/database_service.dart';
@@ -9,6 +10,7 @@ class ChatProvider extends ChangeNotifier {
   final Logger logger = Logger();
   final DatabaseService db = DatabaseService();
   final GeminiService geminiService = GeminiService();
+  final VertexService vertexService = VertexService();
 
   final TextEditingController messageController = TextEditingController();
 
@@ -119,7 +121,9 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<void> _sendMessageToGemini(int chatId, String message) async {
-    final response = await geminiService.sendMessage(message);
+    //final response = await geminiService.sendMessage(message);
+    final response = await vertexService.sendRequestToModel(message);
+
     final responseMessage = ChatMessage(
       chatId: chatId,
       role: 'GEMINI',
