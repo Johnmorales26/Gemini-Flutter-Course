@@ -1,8 +1,8 @@
-import 'package:ai_chat_app/chat.dart';
+import 'package:ai_chat_app/features/chat/domain/chat.dart';
 import 'package:sqflite/sqflite.dart';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart';
-import 'chat_message.dart';
+import '../../features/chat/data/chat_message.dart';
 
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();

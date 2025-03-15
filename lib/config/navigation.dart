@@ -1,5 +1,5 @@
-import 'package:ai_chat_app/routes/routes.dart';
-import 'package:ai_chat_app/screens/chatsModule/chats_screen.dart';
+import 'package:ai_chat_app/config/routes.dart';
+import 'package:ai_chat_app/features/chat/presentation/screens/chats_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 

@@ -1,6 +1,6 @@
-import 'package:ai_chat_app/assets.dart';
-import 'package:ai_chat_app/chat.dart';
-import 'package:ai_chat_app/provider/chat_provider.dart';
+import 'package:ai_chat_app/core/utils/assets.dart';
+import 'package:ai_chat_app/features/chat/domain/chat.dart';
+import 'package:ai_chat_app/core/provider/chat_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -45,16 +45,16 @@ class ChatListWidget extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Eliminar Chat'),
+          title: const Text('Delete chat'),
           content: const Text(
-            '¿Estás seguro de que quieres eliminar este chat?',
+            'Are you sure you want to delete this chat?',
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('Cancelar'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -62,7 +62,7 @@ class ChatListWidget extends StatelessWidget {
                 Navigator.pop(context);
               },
               child: const Text(
-                'Eliminar',
+                'Delete',
                 style: TextStyle(
                   color: Colors.red,
                 ),

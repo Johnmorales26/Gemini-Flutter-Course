@@ -1,7 +1,7 @@
-import 'package:ai_chat_app/chat.dart';
-import 'package:ai_chat_app/chat_message.dart';
-import 'package:ai_chat_app/database_service.dart';
-import 'package:ai_chat_app/gemini_service.dart';
+import 'package:ai_chat_app/features/chat/domain/chat.dart';
+import 'package:ai_chat_app/features/chat/data/chat_message.dart';
+import 'package:ai_chat_app/core/services/database_service.dart';
+import 'package:ai_chat_app/core/services/gemini_service.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
@@ -11,6 +11,8 @@ class ChatProvider extends ChangeNotifier {
   final GeminiService geminiService = GeminiService();
 
   final TextEditingController messageController = TextEditingController();
+
+  final ScrollController scrollController = ScrollController();
 
   bool _isSending = false;
   bool get isSending => _isSending;
@@ -112,6 +114,7 @@ class ChatProvider extends ChangeNotifier {
   void _addMessageToUI(ChatMessage message) {
     _messages ??= [];
     _messages!.add(message);
+    _scrollToBottom();
     notifyListeners();
   }
 
@@ -150,5 +153,16 @@ class ChatProvider extends ChangeNotifier {
 
     await db.deleteChat(chat.id!);
     await db.deleteMessagesFromChat(chat.id!);
+  }
+
+  void _scrollToBottom() async {
+    Future.delayed(Duration(microseconds: 100), () {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+            scrollController.position.maxScrollExtent,
+            duration: Duration(microseconds: 300),
+            curve: Curves.easeOut);
+      }
+    });
   }
 }

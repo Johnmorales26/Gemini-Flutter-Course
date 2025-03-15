@@ -1,4 +1,4 @@
-import 'package:ai_chat_app/assets.dart';
+import 'package:ai_chat_app/core/utils/assets.dart';
 import 'package:flutter/material.dart';
 
 class DrawerHeaderWidget extends StatelessWidget {

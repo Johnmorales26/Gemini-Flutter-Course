@@ -1,5 +1,6 @@
-import 'package:ai_chat_app/assets.dart';
-import 'package:ai_chat_app/provider/chat_provider.dart';
+import 'package:ai_chat_app/core/provider/chat_provider.dart';
+import 'package:ai_chat_app/core/utils/assets.dart';
+import 'package:ai_chat_app/features/chat/presentation/widgets/message_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -16,28 +17,8 @@ class ChatInputWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: provider.messages?.length ?? 0,
-              itemBuilder: (context, index) {
-                final message = provider.messages![index];
-                return Column(
-                  children: [
-                    ListTile(
-                      title: Text(message.content),
-                      subtitle: Text(
-                        message.role,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                    Divider(),
-                  ],
-                );
-              },
-            ),
+            child: MessageListWidget(provider: provider),
           ),
-
           Row(
             children: [
               Expanded(
@@ -47,7 +28,7 @@ class ChatInputWidget extends StatelessWidget {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
-                    hintText: 'Ask what\'s on mind',
+                    hintText: 'Ask what you want',
                   ),
                 ),
               ),
