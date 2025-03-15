@@ -26,4 +26,25 @@ class VertexService {
       return 'Error: $e';
     }
   }
+
+  Stream<String> sendStreamRequestToModel(String message) async* {
+    try {
+      final prompt = [Content.text(message)];
+
+      final streamResponse = model.generateContentStream(prompt);
+
+      await for (final response in streamResponse) {
+        if (response.text != null) {
+          yield response.text!;
+        } else {
+          logger.e('Stream response is null');
+          yield 'Error: Stream response is null';
+        }
+      }
+    } catch (e) {
+      logger.e('Error sending stream request to model: $e');
+      yield 'Error: $e';
+    }
+  }
+
 }

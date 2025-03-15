@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:ai_chat_app/core/services/vertex_service.dart';
 import 'package:ai_chat_app/features/chat/domain/chat.dart';
 import 'package:ai_chat_app/features/chat/data/chat_message.dart';
@@ -27,6 +29,9 @@ class ChatProvider extends ChangeNotifier {
 
   Chat? _activeChat;
   Chat? get activeChat => _activeChat;
+
+  bool _isLoadResponse = false;
+  bool get isLoadResponse => _isLoadResponse;
 
   List<ChatMessage>? _messages;
   List<ChatMessage>? get messages => _messages;
@@ -61,7 +66,7 @@ class ChatProvider extends ChangeNotifier {
       logger.d('Se va a guardar: $newChat');
 
       await _saveChatAndMessage(newChat, userMessage);
-      await _sendMessageToGemini(chatId, messageController.text.trim());
+      _sendMessageToGemini(chatId, messageController.text.trim());
 
       setActiveChat(newChat);
       messageController.clear();
@@ -91,7 +96,7 @@ class ChatProvider extends ChangeNotifier {
       );
 
       await _saveMessage(userMessage);
-      await _sendMessageToGemini(_activeChat!.id!, messageController.text.trim());
+      _sendMessageToGemini(_activeChat!.id!, messageController.text.trim());
 
       messageController.clear();
     } catch (e) {
@@ -120,7 +125,21 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _sendMessageToGemini(int chatId, String message) async {
+  void _updateMessageToUI(ChatMessage updatedMessage) {
+    final index = _messages!.indexWhere((message) => message.id == updatedMessage.id);
+
+    if (index != -1) {
+      _messages![index] = updatedMessage;
+
+      _scrollToBottom();
+
+      notifyListeners();
+    } else {
+      _addMessageToUI(updatedMessage);
+    }
+  }
+
+  /*Future<void> _sendMessageToGemini(int chatId, String message) async {
     //final response = await geminiService.sendMessage(message);
     final response = await vertexService.sendRequestToModel(message);
 
@@ -133,6 +152,47 @@ class ChatProvider extends ChangeNotifier {
 
     await db.insertMessage(responseMessage);
     _addMessageToUI(responseMessage);
+  }*/
+
+  void _sendMessageToGemini(int chatId, String message) async {
+    _isLoadResponse = true;
+    final stream = vertexService.sendStreamRequestToModel(message);
+    final timestamp = DateTime.now();
+
+    final responseMessage = ChatMessage(
+      id: chatId,
+      chatId: chatId,
+      role: 'GEMINI',
+      content: '',
+      timestamp: timestamp,
+    );
+
+    _addMessageToUI(responseMessage);
+
+    final subscription = stream.listen(
+          (response) {
+        responseMessage.content += response;
+
+        _updateMessageToUI(responseMessage);
+      },
+      onError: (error) {
+        responseMessage.content = 'Error: $error';
+
+        _updateMessageToUI(responseMessage);
+
+        db.insertMessage(responseMessage);
+        _isLoadResponse = false;
+      },
+      onDone: () {
+        db.insertMessage(responseMessage);
+        _isLoadResponse = false;
+      },
+      cancelOnError: true
+    );
+
+    // Opcional: Maneja la cancelación del stream si es necesario
+    // Por ejemplo, si el usuario cancela la operación
+    // subscription.cancel();
   }
 
   void fetchChats() async {
