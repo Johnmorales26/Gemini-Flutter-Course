@@ -45,8 +45,23 @@ class ChatsScreen extends StatelessWidget {
                   const SizedBox(height: 16.0),
                   FloatingActionButton.extended(
                       onPressed: () {},
-                      label: Text('New Chat'),
-                      icon: SvgPicture.asset(Assets.icChatFilled))
+                      backgroundColor: Theme
+                          .of(context)
+                          .colorScheme
+                          .primary,
+                      label: Text('New Chat', style: Theme
+                          .of(context)
+                          .textTheme
+                          .labelLarge
+                          ?.copyWith(color: Theme
+                          .of(context)
+                          .colorScheme
+                          .onPrimary)),
+                      icon: SvgPicture.asset(Assets.icChatFilled, color:
+                      Theme
+                          .of(context)
+                          .colorScheme
+                          .onPrimary))
                 ],
               ),
             ),
