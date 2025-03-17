@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:ai_chat_app/core/services/vertex_service.dart';
 import 'package:ai_chat_app/features/chat/domain/chat.dart';
@@ -35,6 +36,9 @@ class ChatProvider extends ChangeNotifier {
 
   List<ChatMessage>? _messages;
   List<ChatMessage>? get messages => _messages;
+
+  File? _fileSelected;
+  File? get fileSelected => _fileSelected;
 
   void setSelectedIndex(int index) {
     _selectedIndex = index;
@@ -156,43 +160,22 @@ class ChatProvider extends ChangeNotifier {
 
   void _sendMessageToGemini(int chatId, String message) async {
     _isLoadResponse = true;
-    final stream = vertexService.sendStreamRequestToModel(message);
+    final response = await vertexService.sendRequestToModel(message, _fileSelected);
     final timestamp = DateTime.now();
 
     final responseMessage = ChatMessage(
-      id: chatId,
+      id: timestamp.microsecondsSinceEpoch,
       chatId: chatId,
       role: 'GEMINI',
-      content: '',
+      content: response,
       timestamp: timestamp,
     );
 
-    _addMessageToUI(responseMessage);
+    _updateMessageToUI(responseMessage);
 
-    final subscription = stream.listen(
-          (response) {
-        responseMessage.content += response;
-
-        _updateMessageToUI(responseMessage);
-      },
-      onError: (error) {
-        responseMessage.content = 'Error: $error';
-
-        _updateMessageToUI(responseMessage);
-
-        db.insertMessage(responseMessage);
-        _isLoadResponse = false;
-      },
-      onDone: () {
-        db.insertMessage(responseMessage);
-        _isLoadResponse = false;
-      },
-      cancelOnError: true
-    );
-
-    // Opcional: Maneja la cancelación del stream si es necesario
-    // Por ejemplo, si el usuario cancela la operación
-    // subscription.cancel();
+    db.insertMessage(responseMessage);
+    _fileSelected = null;
+    _isLoadResponse = false;
   }
 
   void fetchChats() async {
@@ -228,5 +211,10 @@ class ChatProvider extends ChangeNotifier {
             curve: Curves.easeOut);
       }
     });
+  }
+
+  void saveFileSelected(File? file) {
+    _fileSelected = file;
+    notifyListeners();
   }
 }
