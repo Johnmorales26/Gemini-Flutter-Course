@@ -1,11 +1,10 @@
-import 'dart:ffi';
 import 'dart:io';
 
-import 'package:ai_chat_app/core/services/vertex_service.dart';
-import 'package:ai_chat_app/features/chat/domain/chat.dart';
-import 'package:ai_chat_app/features/chat/data/chat_message.dart';
 import 'package:ai_chat_app/core/services/database_service.dart';
 import 'package:ai_chat_app/core/services/gemini_service.dart';
+import 'package:ai_chat_app/core/services/vertex_service.dart';
+import 'package:ai_chat_app/features/chat/data/chat_message.dart';
+import 'package:ai_chat_app/features/chat/domain/chat.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
@@ -37,8 +36,8 @@ class ChatProvider extends ChangeNotifier {
   List<ChatMessage>? _messages;
   List<ChatMessage>? get messages => _messages;
 
-  File? _fileSelected;
-  File? get fileSelected => _fileSelected;
+  List<File> _fileSelected = [];
+  List<File> get fileSelected => _fileSelected;
 
   void setSelectedIndex(int index) {
     _selectedIndex = index;
@@ -174,7 +173,7 @@ class ChatProvider extends ChangeNotifier {
     _updateMessageToUI(responseMessage);
 
     db.insertMessage(responseMessage);
-    _fileSelected = null;
+    _fileSelected = [];
     _isLoadResponse = false;
   }
 
@@ -214,7 +213,16 @@ class ChatProvider extends ChangeNotifier {
   }
 
   void saveFileSelected(File? file) {
-    _fileSelected = file;
+    if (file != null) {
+      _fileSelected.add(file);
+    }
     notifyListeners();
+  }
+
+  void removeFileAtIndex(int index) {
+    if (index >= 0 && index < fileSelected.length) {
+      fileSelected.removeAt(index);
+      notifyListeners();
+    }
   }
 }
