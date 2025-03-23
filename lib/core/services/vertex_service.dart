@@ -12,7 +12,7 @@ class VertexService {
     model = FirebaseVertexAI.instance.generativeModel(model: 'gemini-2.0-flash');
   }
 
-  /*Future<String> sendRequestToModel(String message) async {
+  Future<String> sendRequestToModel(String message) async {
     try {
       final prompt = [Content.text(message)];
 
@@ -28,9 +28,9 @@ class VertexService {
       logger.e('Error sending request to model: $e');
       return 'Error: $e';
     }
-  }*/
+  }
 
-  Future<String> sendRequestToModel(String message, List<File> files) async {
+  Future<String> sendRequestToModelWithImages(String message, List<File> files) async {
     try {
       if (files.isEmpty) {
         logger.e('No files selected');

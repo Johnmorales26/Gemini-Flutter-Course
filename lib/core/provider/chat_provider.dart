@@ -158,23 +158,38 @@ class ChatProvider extends ChangeNotifier {
   }*/
 
   void _sendMessageToGemini(int chatId, String message) async {
-    _isLoadResponse = true;
-    final response = await vertexService.sendRequestToModel(message, _fileSelected);
-    final timestamp = DateTime.now();
+    try {
+      _isLoadResponse = true;
 
-    final responseMessage = ChatMessage(
-      id: timestamp.microsecondsSinceEpoch,
-      chatId: chatId,
-      role: 'GEMINI',
-      content: response,
-      timestamp: timestamp,
-    );
+      String response = '';
 
-    _updateMessageToUI(responseMessage);
+      if (_fileSelected.isNotEmpty) {
+        response = await vertexService.sendRequestToModelWithImages(
+            message, _fileSelected);
+      } else {
+        response = await vertexService.sendRequestToModel(message);
+      }
 
-    db.insertMessage(responseMessage);
-    _fileSelected = [];
-    _isLoadResponse = false;
+      final timestamp = DateTime.now();
+      final responseMessage = ChatMessage(
+        id: timestamp.microsecondsSinceEpoch,
+        chatId: chatId,
+        role: 'GEMINI',
+        content: response,
+        timestamp: timestamp,
+      );
+
+      _updateMessageToUI(responseMessage);
+
+      await db.insertMessage(responseMessage);
+
+      _fileSelected.clear();
+
+      _isLoadResponse = false;
+    } catch (e) {
+      _isLoadResponse = false;
+      debugPrint('Error sending message to Gemini: $e');
+    }
   }
 
   void fetchChats() async {
